@@ -5,54 +5,56 @@ import { app } from '../app';
 import jwt from 'jsonwebtoken';
 
 declare global {
-  var signin: () => string;
+	var signin: () => string;
 }
 
 let mongo: any;
 beforeAll(async () => {
-  process.env.JWT_KEY = 'asdf';
-  mongo = new MongoMemoryServer();
-  await mongo.start();
-  const mongoUri = mongo.getUri();
+	process.env.JWT_KEY = 'asdf';
+	mongo = new MongoMemoryServer();
+	await mongo.start();
+	const mongoUri = mongo.getUri();
 
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+	await mongoose.connect(mongoUri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	});
 });
 
 beforeEach(async () => {
-  const collections = await mongoose.connection.db.collections();
+	const collections = await mongoose.connection.db.collections();
 
-  for (let collection of collections) {
-    await collection.deleteMany({});
-  }
+	for (let collection of collections) {
+		await collection.deleteMany({});
+	}
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
-  await mongo.stop();
+	await mongoose.connection.close();
+	await mongo.stop();
 });
 
 global.signin = () => {
-  // Build a JWT payload. {id,email}
-  const payload = {
-    id: '12lk3jk1l23',
-    email: 'test@test.com',
-  };
+	// Build a JWT payload. {id,email}
+	const id = new mongoose.Types.ObjectId().toHexString();
 
-  // Create the JWT
-  const token = jwt.sign(payload, process.env.JWT_KEY!);
+	const payload = {
+		id: id,
+		email: 'test@test.com',
+	};
 
-  // Build session object {jwt: MY_JWT}
-  const session = { jwt: token };
+	// Create the JWT
+	const token = jwt.sign(payload, process.env.JWT_KEY!);
 
-  // Turn sesion into JSON
-  const sessionJSON = JSON.stringify(session);
+	// Build session object {jwt: MY_JWT}
+	const session = { jwt: token };
 
-  // Take JSON and encode it to base64
-  const base64 = Buffer.from(sessionJSON).toString('base64');
+	// Turn sesion into JSON
+	const sessionJSON = JSON.stringify(session);
 
-  // Return a string that the cookie with the encoded data
-  return `express:sess=${base64}`;
+	// Take JSON and encode it to base64
+	const base64 = Buffer.from(sessionJSON).toString('base64');
+
+	// Return a string that the cookie with the encoded data
+	return `express:sess=${base64}`;
 };
