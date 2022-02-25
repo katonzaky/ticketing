@@ -1,4 +1,3 @@
-import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { Document, Model, Schema, model } from 'mongoose';
 import { Order, OrderStatus } from './order';
 
@@ -46,7 +45,13 @@ const ticketSchema = new Schema(
 );
 
 ticketSchema.set('versionKey', 'version');
-ticketSchema.plugin(updateIfCurrentPlugin);
+ticketSchema.pre('save', function (done) {
+  this.$where = {
+    version: this.get('version') - 1,
+  };
+
+  done();
+});
 
 ticketSchema.statics.findByEvent = (event: { id: string; version: number }) => {
   return Ticket.findOne({
