@@ -25,7 +25,7 @@ const useRequest = ({ url, method, body, onSuccess }) => {
         </div>
       );
 
-      throw err;
+      console.error(err);
     }
   };
 
