@@ -12,10 +12,10 @@ const app = express();
 app.set('trust proxy', true);
 app.use(json());
 app.use(
-  cookieSession({
-    signed: false,
-    secure: process.env.NODE_ENV !== 'test',
-  })
+	cookieSession({
+		signed: false,
+		secure: false,
+	}),
 );
 app.use(currentUser);
 
@@ -25,7 +25,7 @@ app.use(indexOrderRouter);
 app.use(deleteOrderRouter);
 
 app.all('*', async (req, res) => {
-  throw new NotFoundError();
+	throw new NotFoundError();
 });
 
 app.use(errorHandler);
